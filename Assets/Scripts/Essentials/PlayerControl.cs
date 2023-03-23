@@ -9,14 +9,36 @@ public class PlayerControl : MonoBehaviour
     [Range(0.1f,30f)]
     public float playerSpeed = 10f;
 
-    //This is for setting up an object for bullet
+    //This is for setting up an object for bullet and followed object for aiming.
     [Header ("Shooting")]
     public GameObject bullet;
+    public Transform gun;
+
+    [Range(0.1f, 0.5f)]
+    public float fireRate = 0.5f;
+    public bool canFire = true;
+
+    // This is for setting up gamemode
+    [Header("Game mode")]
+    public bool twinstick = false;
+    public bool mouseaim = false;
+    public bool classic = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (twinstick)
+        {
+            gun.GetComponent<TwinStickAim>().enabled = true;
+            gun.GetComponent<GunScript>().enabled = false;
+
+        }
+        else if(classic)
+        {
+            gun.GetComponent<TwinStickAim>().enabled = false;
+            gun.GetComponent<GunScript>().enabled = false;
+
+        }
     }
 
     // Update is called once per frame
@@ -29,16 +51,20 @@ public class PlayerControl : MonoBehaviour
 
         // This is for shooting
 
-        if(Input.GetButtonDown("Jump"))
+        if(!twinstick && Input.GetButtonDown("Fire1") && canFire)
         {
-            Shoot();
+            StartCoroutine("Shoot");
         }
     }
 
-    public void Shoot()
+    public IEnumerator Shoot()
     {
-        Instantiate(bullet, transform.position,transform.rotation);
-
+        Instantiate(bullet, gun.transform.position,gun.transform.rotation);
+        canFire = false;
+        yield return new WaitForSeconds(fireRate);
+        canFire = true;
     }
+
+
 
 }
